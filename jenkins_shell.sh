@@ -14,18 +14,18 @@ sudo docker-compose $COMPOSE_ARGS run --no-deps --rm -e ENV=UNIT identidock
 ERR=$?
 
 #Run system test if unit tests passed
-if [ $ERR -eq0 ]; then
+if [ $ERR -eq 0 ]; then
   IP=$(sudo docker inspect -f {{.NetworkSettings.IPAddress}} jenkins_identidock_1)
   CODE=$(curl -sL -w "%{http_code}" $IP:9090/monster/bla -o /dev/null) || true
   if [ $CODE -eq 200 ]; then
     echo "Test passed - Tagging"
     HASH=$(git rev-parse --short HEAD)
-    sudo docker tag -f jenkins_identidock panasjukav/identidock:$HASH
-    sudo docker tag -f jenkins_identidock panasjukav/identidock:newest
+    sudo docker tag jenkins_identidock dev-env:5000/identidock:$HASH
+    sudo docker tag jenkins_identidock dev-env:5000/identidock:newest
     echo "Pushing"
-    sudo docker login -u panasjukav -p EvfNehvfy2020
-    sudo docker push panasjukav/identidock:$HASH
-    sudo docker push panasjukav/identidock:newest
+    #sudo docker login -u panasjukav -p EvfNehvfy2020
+    sudo docker push dev-env:5000/identidock:$HASH
+    sudo docker push dev-env:5000/identidock:newest
   else
     echo "Site returned " $CODE
     ERR=1
