@@ -3,7 +3,9 @@ identidock-dev:
     ports: 
         - "8000:5000"
     environment: 
-        ENV: PROD
+        ENV: DEV
+    volumes: 
+        - ./app:/app
     links:
         - dnmonster
         - redis
