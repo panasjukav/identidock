@@ -1,5 +1,5 @@
 proxy:
-  image: identiproxy:0.1
+  image: panasjukav/identiproxy:0.1
   links:
     - identidock
   ports:
