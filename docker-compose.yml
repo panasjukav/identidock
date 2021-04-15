@@ -1,7 +1,8 @@
-identidock-dev:
+identidock:
     build: .
-    ports: 
-        - "8000:5000"
+    ports:
+        - "9090:9090"
+        - "9191:9191"
     environment: 
         ENV: PROD
     links:
