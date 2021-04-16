@@ -1,0 +1,68 @@
+---
+- hosts: identidock
+  become: yes
+
+  tasks:
+  - name: python-pip
+    yum: 
+      pkg: python-pip
+
+  - name: docker-py
+    pip: 
+      name: docker-py
+
+  - name: Install Docker
+    yum: 
+      pkg: docker
+    become: yes
+
+  - name: Start Docker service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    become: yes
+
+  - name: redis container
+    docker_container:
+      name: redis
+      image: redis:3
+      pull: yes
+      state: started
+      restart_policy: always
+
+  - name: dnmonster container
+    docker_container:
+      name: dnmonster
+      image: amouat/dnmonster:1.0
+      pull: yes
+      state: started
+      restart_policy: always
+
+  - name: identidock container
+    docker_container:
+      name: identidock
+      image: panasjukav/identidock:newest
+      pull: yes
+      state: started
+      links:
+        - dnmonster:dnmonster
+        - redis:redis
+      env:
+        ENV: PROD
+      restart_policy: always
+
+  - name: proxy container
+    docker_container:
+      name: proxy
+      image: panasjukav/identiproxy:0.1
+      pull: yes
+      state: started
+      links:
+        - identidock:identidock
+      ports:
+        - "80:80"
+      env:
+        NGINX_HOST: 52.59.215.110
+        NGINX_PROXY: http://identidock:9090
+      restart_policy: always
