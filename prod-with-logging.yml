@@ -1,0 +1,66 @@
+proxy:
+  image: panasjukav/identiproxy:0.1
+  container_name: proxy
+  links:
+    - identidock
+  ports:
+    - "80:80"
+  environment:
+    - NGINX_HOST=18.197.104.15
+    - NGINX_PROXY=http://identidock:9090
+
+identidock:
+  image: panasjukav/identidock:newest
+  container_name: identidock
+  links:
+    - dnmonster
+    - redis
+  environment:
+    ENV: PROD
+
+dnmonster:
+  image: amouat/dnmonster:1.0
+  container_name: dnmonster
+
+redis:
+  image: redis:3
+  container_name: identidock_redis
+
+logspout:
+  image: amouat/logspout-logstash:1.0
+  container_name: logspout
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+  ports:
+    - "8000:80"
+  links:
+    - logstash
+  command: logstash://logstash:5000
+
+logstash:
+  image: logstash:2.3.4
+  container_name: logstash  
+  volumes: 
+    - ./logstash.conf:/etc/logstash.conf
+  environment:
+    LOGSPOUT: ignore
+  links:
+    - elasticsearch
+  command: -f /etc/logstash.conf
+
+elasticsearch:
+  image: elasticsearch:2.3
+  container_name: elasticsearch  
+  environment:
+    LOGSPOUT: ignore
+
+kibana:
+  image: kibana:4.5 
+  container_name: kibana  
+  environment:
+    LOGSPOUT: ignore
+    ELASTICSEARCH_URL: http://elasticsearch:9200
+  links:
+    - elasticsearch
+  ports:
+    - "5601:5601"
